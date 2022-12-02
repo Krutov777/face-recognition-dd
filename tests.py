@@ -2,6 +2,8 @@ import numpy as np
 import pickle
 import io
 from PIL import Image
+from filter_image import filter_image2
+from model import compare_images
 
 TEST_DATA_FILE = 'pairs.txt'
 TEST_DATA_FILE_CROPED = 'test_pairs.txt'
@@ -54,17 +56,28 @@ def parse_images():
 
 
 def run_own_tests():
+    positive = 0
+    all = 0
     pairs = parse_images()
-    image_pairs = []
     for pair in pairs:
 
         img1 = Image.open(pair.get_first_path())
         img2 = Image.open(pair.get_second_path())
 
-        np_arr_img1 = np.array(img1)
-        np_arr_img2 = np.array(img2)
+        filtered_img1 = filter_image2(np.array(img1))
+        filtered_img2 = filter_image2(np.array(img2))
+
+        all += 1
+        predict_result = pair.first_dir == pair.second_dir
+        result = compare_images(filtered_img1, filtered_img2)
+        if predict_result == (result >= 0.8):
+            positive += 1
+
+    recall = positive / all
+    #print("F-score = " + "RECALL = \n" + positive + " / " + all + "(" + recall + ")")
+    print(f"\nRECALL = {positive} / {all} = {recall}\n")
+
         
-        image_pairs.append((np_arr_img1, np_arr_img2))
 
 
 def run_their_tests():
