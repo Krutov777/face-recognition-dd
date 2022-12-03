@@ -95,6 +95,8 @@ def run_their_tests():
         result = compare_images(input_img, target_img) + 0.08
         if (result > 1.0):
             result = 1.0
+        elif (result < 0.0):
+            result = 0.0
 
         #all += 1
         #if bool(predict_result) == (result >= 0.8):
