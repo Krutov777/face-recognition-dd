@@ -33,3 +33,11 @@ venv/Scripts/Activate
 ```bash
 pip3 install -r requirements.txt
 ```
+
+### Input:
+
+#### `Put .pkl files in input directory`
+
+### Output:
+
+#### `The output directory will contain file men.npy`
