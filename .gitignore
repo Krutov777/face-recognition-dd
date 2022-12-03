@@ -1,5 +1,9 @@
 /images
-
+/lfw
+pairs.txt
+test_pairs.txt
+pairs_labled.pkl
+pairs.pkl
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

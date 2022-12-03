@@ -10,6 +10,7 @@ TEST_DATA_FILE = 'pairs.txt'
 TEST_DATA_FILE_CROPED = 'test_pairs.txt'
 TEST_DATA_DIR = 'lfw/'
 
+
 class ImagePair:
     def __init__(self, first_dir, first_img_index, second_dir, second_img_index):
         self.first_dir = first_dir
@@ -22,7 +23,6 @@ class ImagePair:
 
     def get_second_path(self):
         return TEST_DATA_DIR + self.second_dir + '/' + self.second_dir + '_' + str(self.second_img_index).zfill(4) + '.jpg'
-
 
 
 def parse_images():
@@ -55,7 +55,6 @@ def parse_images():
     return pairs
 
 
-
 def run_own_tests():
     positive = 0
     all = 0
@@ -75,14 +74,13 @@ def run_own_tests():
 
         if predict_result == (result >= 0.8):
             positive += 1
-        #else:
+        # else:
         #    print(f'failed: {result} {pair.get_first_path()}\t{pair.get_second_path()}')
 
     recall = positive / all
     print(f"\nRECALL = {positive} / {all} = {recall}\n")
 
 
-        
 def run_their_tests():
 
     positive = 0
@@ -92,12 +90,15 @@ def run_their_tests():
     infile.close()
 
     for pair in pairs:
-        input_img =  filter_image(pair[0]) #Image.fromarray(np.uint8(pair[0]))
-        target_img = filter_image(pair[1]) #Image.fromarray(np.uint8(pair[1]))
+        input_img = filter_image(pair[0])  # Image.fromarray(np.uint8(pair[0]))
+        # Image.fromarray(np.uint8(pair[1]))
+        target_img = filter_image(pair[1])
         predict_result = pair[2]
         result = compare_images(input_img, target_img)
 
         all += 1
+        if result == -1:
+            continue
         if bool(predict_result) == (result >= 0.8):
             positive += 1
 
@@ -105,7 +106,6 @@ def run_their_tests():
 
     recall = positive / all
     print(f"\nRECALL = {positive} / {all} = {recall}\n")
-
 
 
 run_their_tests()
