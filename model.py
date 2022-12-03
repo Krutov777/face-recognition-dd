@@ -1,8 +1,9 @@
 import numpy as np
+import torch
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
 
-mtcnn = MTCNN(image_size=122, margin=0)
+mtcnn = MTCNN(image_size=160, margin=0)
 model = InceptionResnetV1(pretrained='vggface2').eval()
 model.classify = True
 
@@ -16,12 +17,16 @@ def cosin_metric(x1, x2):
     return np.dot(x1, x2) / (np.linalg.norm(x1) * np.linalg.norm(x2))
 
 def compare_images(img1, img2):
-    img1_croped = mtcnn(img1)
-    img2_croped = mtcnn(img2)
-
-    img1_probs = model(img1_croped.unsqueeze(0)).detach().numpy()[0]
-    img2_probs = model(img2_croped.unsqueeze(0)).detach().numpy()[0]
-    sim = cosin_metric(img1_probs, img2_probs)
+    
+    try:
+        img1_croped = mtcnn(img1)#torch.from_numpy(np.array(img1))
+        img2_croped = mtcnn(img2)#torch.from_numpy(np.array(img2))
+    
+        img1_probs = model(img1_croped.unsqueeze(0)).detach().numpy()[0]
+        img2_probs = model(img2_croped.unsqueeze(0)).detach().numpy()[0]
+        sim = cosin_metric(img1_probs, img2_probs)
+    except:
+        sim = 0.0
 
     return sim
 

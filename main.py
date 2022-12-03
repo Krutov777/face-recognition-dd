@@ -1,4 +1,5 @@
 from filter_image import *
+import numpy as np
 
 
 if __name__ == '__main__':
