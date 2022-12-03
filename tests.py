@@ -1,6 +1,5 @@
 import numpy as np
 import pickle
-import io
 from PIL import Image
 from filter_image import filter_image2
 from filter_image import filter_image
@@ -9,6 +8,8 @@ from model import compare_images
 TEST_DATA_FILE = 'pairs.txt'
 TEST_DATA_FILE_CROPED = 'test_pairs.txt'
 TEST_DATA_DIR = 'lfw/'
+TEST_OUTPUT_FILE = 'output/men'
+TEST_INPUT_FILE = 'input/pairs.pkl'
 
 
 class ImagePair:
@@ -61,7 +62,6 @@ def run_own_tests():
     pairs = parse_images()
     for pair in pairs:
 
-        #print(f'test: {pair.get_first_path()}\t{pair.get_second_path()}')
         img1 = Image.open(pair.get_first_path())
         img2 = Image.open(pair.get_second_path())
 
@@ -74,8 +74,6 @@ def run_own_tests():
 
         if predict_result == (result >= 0.8):
             positive += 1
-        # else:
-        #    print(f'failed: {result} {pair.get_first_path()}\t{pair.get_second_path()}')
 
     recall = positive / all
     print(f"\nRECALL = {positive} / {all} = {recall}\n")
@@ -83,29 +81,28 @@ def run_own_tests():
 
 def run_their_tests():
 
-    positive = 0
-    all = 0
-    infile = open('pairs_labled.pkl', 'rb')
+    #positive = 0
+    #all = 0
+    infile = open(TEST_INPUT_FILE, 'rb')
     pairs = pickle.load(infile)
     infile.close()
+    probs = []
 
     for pair in pairs:
-        input_img = filter_image(pair[0])  # Image.fromarray(np.uint8(pair[0]))
-        # Image.fromarray(np.uint8(pair[1]))
-        target_img = filter_image(pair[1])
-        predict_result = pair[2]
-        result = compare_images(input_img, target_img)
+        input_img =  filter_image2(pair[0]) #Image.fromarray(np.array(pair[0]))
+        target_img = filter_image2(pair[1]) #Image.fromarray(np.array(pair[1]))
+        #predict_result = pair[2]
+        result = compare_images(input_img, target_img) + 0.08
+        if (result > 1.0):
+            result = 1.0
 
-        all += 1
-        if result == -1:
-            continue
-        if bool(predict_result) == (result >= 0.8):
-            positive += 1
+        #all += 1
+        #if bool(predict_result) == (result >= 0.8):
+        #    positive += 1
 
-        print(f"test: {result}")
+        probs.append(result)
+        #print(f"test: {result}")
 
-    recall = positive / all
-    print(f"\nRECALL = {positive} / {all} = {recall}\n")
-
-
-run_their_tests()
+    #recall = positive / all
+    #print(f"\nRECALL = {positive} / {all} = {recall}\n")
+    np.save(TEST_OUTPUT_FILE, np.array(probs))
