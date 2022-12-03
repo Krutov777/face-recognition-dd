@@ -3,15 +3,15 @@ import torch
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from PIL import Image
 
-mtcnn = MTCNN(image_size=160, margin=0)
-model = InceptionResnetV1(pretrained='vggface2', classify=True).eval()
+model = InceptionResnetV1(pretrained='vggface2', classify=True).eval().float()
+mtcnn = MTCNN(image_size=160)
 
-
-def set_model(a=0):
+def set_model(a = 0):
+    global model
     if a == 0:
-        model = InceptionResnetV1(pretrained='vggface2').eval()
+        model = InceptionResnetV1(pretrained='vggface2', classify=True).eval().float()
     else:
-        model = InceptionResnetV1(pretrained='casia-webface').eval()
+        model = InceptionResnetV1(pretrained='casia-webface', classify=True).eval().float()
 
 
 def cosin_metric(x1, x2):
@@ -19,13 +19,27 @@ def cosin_metric(x1, x2):
 
 
 def compare_images(img1, img2):
-    # img1_croped = torch.from_numpy(np.array(img1))
-    # img2_croped = torch.from_numpy(np.array(img2))
-    img1_croped = mtcnn(img1)
-    img2_croped = mtcnn(img2)
-    img1_probs = model(img1_croped.unsqueeze(0)).detach().numpy()[0]
-    img2_probs = model(img2_croped.unsqueeze(0)).detach().numpy()[0]
+    
+    img1_resized = (np.array(img1.resize((160, 160)))).astype(float)/255
+    img2_resized = (np.array(img2.resize((160, 160)))).astype(float)/255
+
+    img1_croped = torch.from_numpy(img1_resized)
+    img2_croped = torch.from_numpy(img2_resized)
+
+    # shape(3, x, y)
+    # shape(x, y, 3)
+    if img1_croped.shape[0] != 3:
+        img1_croped = img1_croped.permute(2, 0, 1)
+    if img2_croped.shape[0] != 3:
+        img2_croped = img2_croped.permute(2, 0, 1)
+
+    img1_croped = img1_croped.unsqueeze(0)
+    img2_croped = img2_croped.unsqueeze(0)
+
+    img1_probs = model(img1_croped.float()).detach().numpy()[0]
+    img2_probs = model(img2_croped.float()).detach().numpy()[0]
     sim = cosin_metric(img1_probs, img2_probs)
+
     return sim
 
 
